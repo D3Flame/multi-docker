@@ -1,0 +1,19 @@
+language: generic
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t dennistismenko/react-test -f ./client/Dockerfile.dev ./client
+script:
+  - docker run -e CI=true dennistismenko/react-test npm run test
+after_success:
+  - docker build -t dennistismenko/multi-client ./client
+  - docker build -t dennistismenko/multi-nginx ./nginx
+  - docker build -t dennistismenko/multi-server ./server
+  - docker build -t dennistismenko/multi-worker ./worker
+  - docker login -u $DOCKER_ID -p $DOCKER_PASSWORD
+  - docker push dennistismenko/multi-client
+  - docker push dennistismenko/multi-nginx
+  - docker push dennistismenko/multi-server
+  - docker push dennistismenko/multi-worker
